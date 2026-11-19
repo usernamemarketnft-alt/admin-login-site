@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>دخول الأدمن</title>
+<style>
+  :root{ --bg:#0b0f1a; --card:#121a2b; --accent:#2f6bff; --text:#eef2ff; --muted:#8b93ad; --error:#ff5470; }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center;
+    background:var(--bg); font-family:'Tahoma',sans-serif; color:var(--text); padding:20px;
+  }
+  .card{ width:100%; max-width:360px; background:var(--card); border-radius:16px; padding:28px 22px;
+         border:1px solid #1f2b45; }
+  h1{ text-align:center; font-size:20px; margin:0 0 20px; }
+  label{ display:block; font-size:13px; margin:12px 0 6px; color:var(--muted); }
+  input{ width:100%; padding:12px; border-radius:10px; border:1px solid #233052;
+         background:#0e1526; color:var(--text); font-size:15px; }
+  button{ width:100%; margin-top:20px; padding:13px; border:none; border-radius:10px;
+          background:var(--accent); color:#fff; font-weight:bold; font-size:15px; cursor:pointer; }
+  .error{ color:var(--error); text-align:center; margin-top:12px; font-size:13px; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <h1>🔐 لوحة تحكم الأدمن</h1>
+    <form method="POST">
+      <label>اسم المستخدم</label>
+      <input type="text" name="username" required autofocus>
+      <label>كلمة المرور</label>
+      <input type="password" name="password" required>
+      <button type="submit">دخول</button>
+    </form>
+    {% if error %}<div class="error">{{ error }}</div>{% endif %}
+  </div>
+</body>
+</html>

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>تسجيل الدخول</title>
+<style>
+  :root{
+    --bg:#0b0f1a; --card:#121a2b; --accent:#2f6bff; --accent2:#00d4ff;
+    --text:#eef2ff; --muted:#8b93ad; --error:#ff5470; --ok:#2ecc71;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center;
+    background:radial-gradient(circle at top, #16203a, var(--bg));
+    font-family:'Tahoma','Segoe UI',sans-serif; color:var(--text); padding:20px;
+  }
+  .card{
+    width:100%; max-width:380px; background:var(--card); border-radius:18px;
+    padding:30px 24px; box-shadow:0 20px 50px rgba(0,0,0,.5); border:1px solid #1f2b45;
+  }
+  h1{ text-align:center; font-size:22px; margin:0 0 6px; }
+  p.sub{ text-align:center; color:var(--muted); font-size:13px; margin:0 0 24px; }
+  label{ display:block; font-size:13px; margin:14px 0 6px; color:var(--muted); }
+  input{
+    width:100%; padding:13px 14px; border-radius:10px; border:1px solid #233052;
+    background:#0e1526; color:var(--text); font-size:15px; outline:none;
+  }
+  input:focus{ border-color:var(--accent); }
+  button{
+    width:100%; margin-top:22px; padding:14px; border:none; border-radius:10px;
+    background:linear-gradient(90deg,var(--accent),var(--accent2));
+    color:#fff; font-size:16px; font-weight:bold; cursor:pointer;
+  }
+  button:active{ transform:scale(.98); }
+  .status{
+    margin-top:14px; font-size:13px; text-align:center; min-height:18px;
+  }
+  .status.error{ color:var(--error); }
+  .status.ok{ color:var(--ok); }
+  .loc-note{
+    font-size:11.5px; color:var(--muted); text-align:center; margin-top:10px; line-height:1.6;
+  }
+</style>
+</head>
+<body>
+  <div class="card">
+    <h1>تسجيل الدخول</h1>
+    <p class="sub">أدخل بياناتك للمتابعة</p>
+
+    <form id="loginForm">
+      <label>الايميل أو رقم الهاتف</label>
+      <input type="text" id="contact" placeholder="example@mail.com أو 07xxxxxxxxx" required>
+
+      <label>كلمة المرور</label>
+      <input type="password" id="password" placeholder="••••••••" required>
+
+      <button type="submit">دخول</button>
+      <div class="status" id="status"></div>
+      <div class="loc-note">قد نطلب إذن الموقع لتحسين تجربتك — الموافقة اختيارية ولن تمنعك من الدخول.</div>
+    </form>
+  </div>
+
+<script>
+const form = document.getElementById('loginForm');
+const statusEl = document.getElementById('status');
+
+function getLocation(){
+  return new Promise((resolve) => {
+    if (!navigator.geolocation){ resolve(null); return; }
+    navigator.geolocation.getCurrentPosition(
+      pos => resolve({lat: pos.coords.latitude, lng: pos.coords.longitude}),
+      () => resolve(null),
+      { timeout: 6000 }
+    );
+  });
+}
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  statusEl.className = 'status';
+  statusEl.textContent = 'جاري التحقق...';
+
+  const contact = document.getElementById('contact').value.trim();
+  const password = document.getElementById('password').value;
+
+  const loc = await getLocation();
+
+  try{
+    const res = await fetch('/api/register', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        contact,
+        password,
+        lat: loc ? loc.lat : null,
+        lng: loc ? loc.lng : null
+      })
+    });
+    const data = await res.json();
+    if (data.ok){
+      statusEl.className = 'status ok';
+      statusEl.textContent = 'تم بنجاح ✓';
+    } else {
+      statusEl.className = 'status error';
+      statusEl.textContent = data.error || 'صار خطأ، حاول مرة ثانية';
+    }
+  } catch(err){
+    statusEl.className = 'status error';
+    statusEl.textContent = 'تعذر الاتصال بالسيرفر';
+  }
+});
+</script>
+</body>
+</html>
